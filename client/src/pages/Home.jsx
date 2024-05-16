@@ -1,6 +1,12 @@
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoneyBillWave } from "@fortawesome/free-solid-svg-icons";
+import { FaHome, FaSignOutAlt, FaExchangeAlt } from "react-icons/fa";
+import { useState } from "react";
+import { AiOutlineMenu, AiOutlineClose } from "react-icons/ai";
+import Modal from "react-modal";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 const Container = styled.div`
   width: 100vw;
@@ -13,7 +19,65 @@ const Left = styled.div`
   width: 15%;
   height: 100%;
   background-color: #f5f5f5;
-  `;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const StyledAiOutlineMenu = styled(AiOutlineMenu)`
+  display: none;
+  font-size: 30px;
+  color: #fff;
+  padding: 10px;
+  position: absolute;
+  top: 4px;
+  right: 10px;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+  opacity: ${(props) => (props.modalIsOpen ? 0 : 1)};
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
+const StyledAiOutlineClose = styled(AiOutlineClose)`
+  display: none;
+  font-size: 30px;
+  color: #000;
+  padding: 10px;
+  position: absolute;
+  top: 4px;
+  right: 10px;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+  opacity: ${(props) => (props.modalIsOpen ? 1 : 0)};
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
+const StyledModal = styled(Modal)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  overflow: auto;
+  webkitoverflowscrolling: touch;
+  borderradius: 0;
+  outline: none;
+  background-color: #f5f5f5;
+`;
 
 const Logo = styled.div`
   font-size: 30px;
@@ -25,26 +89,53 @@ const Logo = styled.div`
   justify-content: center;
   align-items: center;
   gap: 10px;
+
+  @media (max-width: 768px) {
+  color: #e49603;
 `;
 
 const Nav = styled.div`
   background-color: #e49603;
-  width: 80%;
+  width: 90%;
   height: 5%;
-  border-radius:
-  margin: 10px;
+  border-radius: 10px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+
+  &: hover {
+    color: #e49603;
+    background-color: #fff;
+  }
+
+  @media (max-width: 768px) {
+    width: 70%;
+    background-color: #f5f5f5;
+    color: #000;
+    align-items: right;
+    justify-content: flex-start;
+    margin-left: 30%;
+  }
 `;
 
 const NavText = styled.a`
-font-width: 700;
-font-size: 25px;
-cursor: pointer;
+  font-weight: 700;
+  font-size: 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
 `;
 
 const Right = styled.div`
   width: 85%;
   height: 100%;
   background-color: #e49603;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const Heading = styled.div`
@@ -87,9 +178,8 @@ const BoxContainer = styled.div`
 
 const Box1Container = styled.div`
   height: 100%;
-  width: 47%;
+  width: 90%;
   diplay: flex;
-  // background-color: red;
   justify-content: center;
 
   @media (max-width: 768px) {
@@ -106,6 +196,12 @@ const Box1a = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  @media (max-width: 768px) {
+    width: 95%;
+    margin-left: 2%;
+    height: 70%;
+  }
 `;
 
 const Box1Heading = styled.h1`
@@ -113,6 +209,11 @@ const Box1Heading = styled.h1`
   font-size: 25px;
   padding: 1% 2%;
   align-self: flex-start;
+
+  @media (max-width: 768px) {
+    font-size: 22px;
+    align-self: center;
+  }
 `;
 
 const SubBox = styled.div`
@@ -121,10 +222,15 @@ const SubBox = styled.div`
   display: flex;
   justify-content: space-around;
   align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    height: 70%;
+  }
 `;
 
 const SubBox1 = styled.div`
-  width: 46%;
+  width: 40%;
   height: 80%;
   background-color: #e49603;
   border-radius: 10px;
@@ -132,6 +238,11 @@ const SubBox1 = styled.div`
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
+
+  @media (max-width: 768px) {
+    height: 40%;
+    width: 90%;
+  }
 `;
 
 const SubBoxText = styled.h1`
@@ -140,22 +251,32 @@ const SubBoxText = styled.h1`
   color: #fff;
   align-self: flex-start;
   padding-left: 14%;
+
+  @media (max-width: 768px) {
+    font-size: 19px;
+    padding-left: 1%;
+    align-self: center;
+  }
 `;
 
 const StyledInput = styled.input`
-  width: 70%;
+  width: 60%;
   height: 38%;
   background-color: #f7f7f7;
   border-radius: 10px;
   border: none;
   padding-left: 8px;
   font-size: 16px;
+
+  @media (max-width: 768px) {
+    width: 60%;
+  }
 `;
 
 const SubmitButton = styled.button`
   background-color: #e49603;
   color: #fff;
-  width: 50%;
+  width: 40%;
   height: 20%;
   border-radius: 10px;
   font-size: 22px;
@@ -166,46 +287,116 @@ const SubmitButton = styled.button`
 
   &: hover {
     color: #e49603;
-    background-color: #fff;
+    background-color: #f7f7f7;
+    border: 1px #e49603 solid;
+  }
+
+  @media (max-width: 768px) {
+    margin-top: 5px;
+    height: 15%;
+    width: 90%;
   }
 `;
 
 const Box1b = styled.div`
-  height: 20%;
+  height: 40%;
   margin-top: 5%;
   display: flex;
 
-  justify-content: space-around;
+  justify-content: space-between;
   width: 90%;
-  background-color: #f5f5f5;
-  border-radius: 5px;
+  background-color: #e49603;
   margin-left: 4%;
   flex-direction: row;
   align-items: center;
+
+  @media (max-width: 768px) {
+    margin-top: 2%;
+    width: 95%;
+    margin-left: 2%;
+  }
 `;
 
 const Cash = styled.div`
-  width: 45%;
+  width: 25%;
   height: 60%;
   border-radius: 10px;
-  background-color: #e49603;
+  background-color: #f7f7f7;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+
+  @media (max-width: 768px) {
+    width: 30%;
+    justify-content: center;
+    text-align: center;
+  }
 `;
 
 const Text = styled.h1`
-  padding-left: 3%;
-  color: #fff;
+  padding: 4%;
+  color: #e49603;
   font-size: 18px;
+
+  @media (max-width: 768px) {
+    padding: 6%;
+  }
 `;
-const Box2 = styled.div`
-  height: 76%;
-  width: 35%;
-  background-color: #f5f5f5;
-  border-radius: 5px;
+
+const TextValue = styled.h1`
+  padding: 4%;
+  color: #e49603;
+  font-size: 3rem;
+`;
+
+const ModalStructure = styled.div`
+  padding-top: 10%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
 `;
 
 const Home = () => {
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [transactionData, setTransactionData] = useState({});
+  const [tripAmount, setTripAmount] = useState(0);
+  const [distanceTravelled, setDistanceTravelled] = useState(0);
+  const username = Cookies.get("username");
+
+  const toggleModal = () => {
+    setModalIsOpen(!modalIsOpen);
+  };
+
+  const handleTransaction = async () => {
+    console.log(tripAmount, distanceTravelled);
+    try {
+      const response = await axios.post(
+        "/api/transactions/new",
+        {
+          distanceTravelled,
+          tripAmount,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        }
+      );
+      console.log(response);
+      if (response.status === 200) {
+        setTransactionData(response.data);
+        console.log(response.data);
+        alert("Transaction successful!");
+      } else {
+        alert("Transaction failed!");
+      }
+    } catch (error) {
+      alert("Transaction failed!");
+      console.log(error);
+    }
+  };
+
   return (
     <Container>
       <Left>
@@ -214,14 +405,33 @@ const Home = () => {
           KATAB
         </Logo>
         <Nav>
-          <NavText>Home</NavText>
+          <NavText>
+            {" "}
+            <FaHome style={{ marginRight: "10px" }} />
+            Home
+          </NavText>
+        </Nav>
+        <Nav>
+          <NavText>
+            {" "}
+            <FaExchangeAlt style={{ marginRight: "10px" }} />
+            Transactions
+          </NavText>
+        </Nav>
+        <Nav>
+          <NavText>
+            {" "}
+            <FaSignOutAlt style={{ marginRight: "10px" }} />
+            Logout
+          </NavText>
         </Nav>
       </Left>
       <Right>
+        <StyledAiOutlineMenu className="menu-icon" onClick={toggleModal} />
         <Heading>Home</Heading>
         <WelcomeContainer>
           <Welcome>Welcome,</Welcome>
-          <Name>John! </Name>
+          <Name>{username}! </Name>
         </WelcomeContainer>
         <BoxContainer>
           <Box1Container>
@@ -231,28 +441,73 @@ const Home = () => {
                 {" "}
                 <SubBox1>
                   <SubBoxText>Input Trip Amount</SubBoxText>
-                  <StyledInput type="text" placeholder="amount" />
+                  <StyledInput
+                    type="number"
+                    placeholder="amount"
+                    onChange={(e) => setTripAmount(parseInt(e.target.value))}
+                  />
                 </SubBox1>
                 <SubBox1>
                   <SubBoxText>Input Trip Kilometers </SubBoxText>
-                  <StyledInput type="text" placeholder="kilometers" />
+                  <StyledInput
+                    type="number"
+                    placeholder="kilometers"
+                    onChange={(e) =>
+                      setDistanceTravelled(parseInt(e.target.value))
+                    }
+                  />
                 </SubBox1>
               </SubBox>
-              <SubmitButton>Continue</SubmitButton>
+              <SubmitButton onClick={handleTransaction}>Continue</SubmitButton>
             </Box1a>
             <Box1b>
               <Cash>
                 <Text>Total Bonus</Text>
+                <TextValue>0</TextValue>
               </Cash>
               <Cash>
                 <Text>Total Miles </Text>
+                <TextValue>0</TextValue>
+              </Cash>
+              <Cash>
+                <Text>Total Miles </Text>
+                <TextValue>0</TextValue>
               </Cash>
             </Box1b>
           </Box1Container>
-
-          <Box2>Box</Box2>
         </BoxContainer>
       </Right>
+
+      <StyledModal isOpen={modalIsOpen} onRequestClose={toggleModal}>
+        <StyledAiOutlineClose onClick={toggleModal} modalIsOpen={modalIsOpen} />
+        <ModalStructure>
+          <Logo>
+            <FontAwesomeIcon icon={faMoneyBillWave} />
+            KATAB
+          </Logo>
+          <Nav>
+            <NavText>
+              {" "}
+              <FaHome style={{ marginRight: "10px" }} />
+              Home
+            </NavText>
+          </Nav>
+          <Nav>
+            <NavText>
+              {" "}
+              <FaExchangeAlt style={{ marginRight: "10px" }} />
+              Transactions
+            </NavText>
+          </Nav>
+          <Nav>
+            <NavText>
+              {" "}
+              <FaSignOutAlt style={{ marginRight: "10px" }} />
+              Logout
+            </NavText>
+          </Nav>
+        </ModalStructure>
+      </StyledModal>
     </Container>
   );
 };
