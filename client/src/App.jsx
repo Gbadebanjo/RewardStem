@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import "./App.css";
 import Login from "./pages/Login";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -12,14 +12,17 @@ if (import.meta.env.VITE_ENV === "production") {
 } else {
   axios.defaults.baseURL = import.meta.env.VITE_LOCALBASE_URL;
 }
+
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/transaction" element={<Transaction />} />
-      <Route path="/login" element={<Login />} />
-      <Route index path="/signup" element={<SignUp />} />
-    </Routes>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/transaction" element={<Transaction />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+      </Routes>
+    </Router>
   );
 }
 

@@ -7,7 +7,7 @@ import { AiOutlineMenu, AiOutlineClose } from "react-icons/ai";
 import Modal from "react-modal";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useNavigation } from "react-router-dom";
+import {  Link } from "react-router-dom";
 
 const Container = styled.div`
   width: 100vw;
@@ -31,11 +31,11 @@ const Left = styled.div`
 
 const StyledAiOutlineMenu = styled(AiOutlineMenu)`
   display: none;
-  font-size: 30px;
+  font-size: 50px;
   color: #fff;
   padding: 10px;
   position: absolute;
-  top: 4px;
+  top: 7px;
   right: 10px;
   cursor: pointer;
   transition: opacity 0.3s ease;
@@ -48,7 +48,7 @@ const StyledAiOutlineMenu = styled(AiOutlineMenu)`
 
 const StyledAiOutlineClose = styled(AiOutlineClose)`
   display: none;
-  font-size: 30px;
+  font-size: 50px;
   color: #000;
   padding: 10px;
   position: absolute;
@@ -121,12 +121,22 @@ const Nav = styled.div`
   }
 `;
 
-const NavText = styled.div`
+const NavText = styled(Link)`
   font-weight: 700;
   font-size: 25px;
   cursor: pointer;
   display: flex;
   align-items: center;
+  text-decoration: none;
+  color: #fff;
+
+  &: hover {
+    color: #e49603;
+  }
+
+  @media (max-width: 768px) {
+    color: #000;
+  }
 `;
 
 const Right = styled.div`
@@ -304,12 +314,13 @@ const Box1b = styled.div`
   margin-top: 5%;
   display: flex;
 
-  justify-content: space-between;
+  justify-content: space-around;
   width: 90%;
   background-color: #e49603;
   margin-left: 4%;
   flex-direction: row;
   align-items: center;
+  justify-content: space-around;
 
   @media (max-width: 768px) {
     margin-top: 2%;
@@ -319,15 +330,16 @@ const Box1b = styled.div`
 `;
 
 const Cash = styled.div`
-  width: 25%;
+  width: 30%;
   height: 60%;
   border-radius: 10px;
   background-color: #f7f7f7;
   display: flex;
   flex-direction: column;
+  margin: 5%;
 
   @media (max-width: 768px) {
-    width: 30%;
+    width: 40%;
     justify-content: center;
     text-align: center;
   }
@@ -337,6 +349,7 @@ const Text = styled.h1`
   padding: 4%;
   color: #e49603;
   font-size: 18px;
+  align-self: center;
 
   @media (max-width: 768px) {
     padding: 6%;
@@ -344,9 +357,9 @@ const Text = styled.h1`
 `;
 
 const TextValue = styled.h1`
-  padding: 4%;
   color: #e49603;
   font-size: 3rem;
+  align-self: center;
 `;
 
 const ModalStructure = styled.div`
@@ -364,25 +377,18 @@ const Home = () => {
   const [tripAmount, setTripAmount] = useState(0);
   const [distanceTravelled, setDistanceTravelled] = useState(0);
   const username = Cookies.get("username");
-  const navigate = useNavigation();
+  // const history = useHistory();
 
   const toggleModal = () => {
     setModalIsOpen(!modalIsOpen);
   };
 
-  const Logout = () => {
-    Cookies.remove("token");
-    Cookies.remove("username");
-    navigate("/login");
-  };
+  // const Logout = () => {
+  //   Cookies.remove("token");
+  //   Cookies.remove("username");
+  //   history("/login");
+  // };
 
-  const Trans = () => {
-    navigate("/transaction");
-  };
-
-  const Home = () => {
-    navigate("/home");
-  };
 
   const handleTransaction = async () => {
     // console.log(tripAmount, distanceTravelled);
@@ -406,7 +412,7 @@ const Home = () => {
       if (response.status === 200) {
         setTransactionData(response.data);
         console.log(transactionData);
-        // console.log(response.data);
+        console.log(response.data);
         alert("Transaction successful!");
       } else {
         alert("Transaction failed!");
@@ -425,20 +431,20 @@ const Home = () => {
           KATAB
         </Logo>
         <Nav>
-          <NavText onClick={Home} >
+          <NavText to="/" >
             {" "}
             <FaHome style={{ marginRight: "10px" }} />
             Home
           </NavText>
         </Nav>
         <Nav >
-          <NavText onClick={Trans}>
+          <NavText to="/transaction">
             <FaExchangeAlt style={{ marginRight: "10px" }} />
             Transactions
           </NavText>
         </Nav>
         <Nav>
-          <NavText onClick={Logout} >
+          <NavText to='/logout' >
             {" "}
             <FaSignOutAlt style={{ marginRight: "10px" }} />
             Logout
@@ -481,10 +487,6 @@ const Home = () => {
             </Box1a>
             <Box1b>
               <Cash>
-                <Text>Total Bonus</Text>
-                <TextValue>0</TextValue>
-              </Cash>
-              <Cash>
                 <Text>Total Amount Spent </Text>
                 <TextValue>{transactionData.reward ? transactionData.transaction.totalBalance : 0}</TextValue>
               </Cash>
@@ -505,21 +507,21 @@ const Home = () => {
             KATAB
           </Logo>
           <Nav>
-            <NavText>
+            <NavText to="/">
               {" "}
               <FaHome style={{ marginRight: "10px" }} />
               Home
             </NavText>
           </Nav>
           <Nav>
-            <NavText>
+            <NavText to="/transaction">
               {" "}
               <FaExchangeAlt style={{ marginRight: "10px" }} />
               Transactions
             </NavText>
           </Nav>
           <Nav>
-            <NavText>
+            <NavText to="/logout">
               {" "}
               <FaSignOutAlt style={{ marginRight: "10px" }} />
               Logout
