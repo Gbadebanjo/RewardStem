@@ -7,6 +7,7 @@ import { AiOutlineMenu, AiOutlineClose } from "react-icons/ai";
 import Modal from "react-modal";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useNavigation } from "react-router-dom";
 
 const Container = styled.div`
   width: 100vw;
@@ -120,7 +121,7 @@ const Nav = styled.div`
   }
 `;
 
-const NavText = styled.a`
+const NavText = styled.div`
   font-weight: 700;
   font-size: 25px;
   cursor: pointer;
@@ -363,14 +364,32 @@ const Home = () => {
   const [tripAmount, setTripAmount] = useState(0);
   const [distanceTravelled, setDistanceTravelled] = useState(0);
   const username = Cookies.get("username");
+  const navigate = useNavigation();
 
   const toggleModal = () => {
     setModalIsOpen(!modalIsOpen);
   };
 
+  const Logout = () => {
+    Cookies.remove("token");
+    Cookies.remove("username");
+    navigate("/login");
+  };
+
+  const Trans = () => {
+    navigate("/transaction");
+  };
+
+  const Home = () => {
+    navigate("/home");
+  };
+
   const handleTransaction = async () => {
-    console.log(tripAmount, distanceTravelled);
+    // console.log(tripAmount, distanceTravelled);
     try {
+
+      const token = Cookies.get("token");
+      // console.log("Token from cookie:", token);
       const response = await axios.post(
         "/api/transactions/new",
         {
@@ -379,14 +398,15 @@ const Home = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${Cookies.get("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-      console.log(response);
+      // console.log(response);
       if (response.status === 200) {
         setTransactionData(response.data);
-        console.log(response.data);
+        console.log(transactionData);
+        // console.log(response.data);
         alert("Transaction successful!");
       } else {
         alert("Transaction failed!");
@@ -405,21 +425,20 @@ const Home = () => {
           KATAB
         </Logo>
         <Nav>
-          <NavText>
+          <NavText onClick={Home} >
             {" "}
             <FaHome style={{ marginRight: "10px" }} />
             Home
           </NavText>
         </Nav>
-        <Nav>
-          <NavText>
-            {" "}
+        <Nav >
+          <NavText onClick={Trans}>
             <FaExchangeAlt style={{ marginRight: "10px" }} />
             Transactions
           </NavText>
         </Nav>
         <Nav>
-          <NavText>
+          <NavText onClick={Logout} >
             {" "}
             <FaSignOutAlt style={{ marginRight: "10px" }} />
             Logout
@@ -466,12 +485,12 @@ const Home = () => {
                 <TextValue>0</TextValue>
               </Cash>
               <Cash>
-                <Text>Total Miles </Text>
-                <TextValue>0</TextValue>
+                <Text>Total Amount Spent </Text>
+                <TextValue>{transactionData.reward ? transactionData.transaction.totalBalance : 0}</TextValue>
               </Cash>
               <Cash>
-                <Text>Total Miles </Text>
-                <TextValue>0</TextValue>
+                <Text>Total Miles Travelled </Text>
+                <TextValue>{transactionData.reward ? transactionData.transaction.totalDistanceTravelled : 0}</TextValue>
               </Cash>
             </Box1b>
           </Box1Container>

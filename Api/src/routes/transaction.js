@@ -5,8 +5,8 @@ import { newTransaction, getTransactions } from '../controller/transaction.js';
 const router = express.Router();
 
 router.use(authenticate);
-router.post('/new/', authenticate, validateTransaction, newTransaction);
-router.get('/all-transactions', authenticate, getTransactions);
+router.post('/new/', validateTransaction, newTransaction);
+router.get('/all-transactions', getTransactions);
 
 // Error handling middleware
 router.use((err, req, res, next) => {

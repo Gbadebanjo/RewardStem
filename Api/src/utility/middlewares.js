@@ -21,7 +21,10 @@ export function errorHandler(err, req, res, next) {
 
 export const authenticate = (req, res, next) => {
   try {
-    const token = req.cookies.jwt;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+
+    console.log(`token: `,token)
 
   if (!token) {
     return res.status(403).json({

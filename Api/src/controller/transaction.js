@@ -48,11 +48,20 @@ export const newTransaction = async (req, res) => {
         newTransaction.rewards.push(newReward._id);
         await newTransaction.save();
 
+            // Fetch all rewards for the user
+    const userRewards = await Reward.find({ userId: userId });
+
+    // Calculate the total cash back and miles points up to the current transaction
+    const totalCashBack = userRewards.reduce((sum, reward) => sum + reward.cashBack, 0) + cashBack;
+    const totalMilesPoints = userRewards.reduce((sum, reward) => sum + reward.milesPoints, 0) + milesPoints;
+
     return res.status(200).json({
       status: 200,
       message: 'Transaction and reward created successfully',
       transaction: newTransaction,
-      reward: newReward
+      reward: newReward,
+      totalCashBack,
+      totalMilesPoints
     });
   } catch (error) {
     console.log(error)
