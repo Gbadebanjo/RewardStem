@@ -11,6 +11,7 @@ import "./models/transactions.js";
 import "./models/rewards.js";
 import userRouter from './routes/user.js';
 import transactionRouter from './routes/transaction.js';
+import vehicleTypeRouter from './routes/vehicleType.js';
 import { errorHandler, notFound } from './utility/middlewares.js';
 
 config();
@@ -26,10 +27,12 @@ app.use(cors({
 app.use(morgan('dev'));
 app.use(helmet());
 app.use(json());
+app.use(express.json());
 app.use(cookieParser());
 
 app.use('/api/users', userRouter);
 app.use('/api/transactions', transactionRouter);
+app.use('/api/admins', vehicleTypeRouter);
 
 app.get('/', (req, res) => {
   res.json({

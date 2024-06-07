@@ -23,6 +23,16 @@ export const transaction = Joi.object().keys({
   tripAmount: Joi.number().required()
 });
 
+export const vehicleTypeSchema = Joi.object({
+  vehicleName: Joi.string().required(),
+  baseFare: Joi.number().required(),
+  costPerMinute: Joi.number().required(),
+  costPerMile: Joi.number().required(),
+  hourlyRate: Joi.number().required(),
+  surgeMultiplier: Joi.number().required(),
+  additionalFees: Joi.number().required(),
+});
+
 export const options = {
     abortEarly: false,
     errors: {
