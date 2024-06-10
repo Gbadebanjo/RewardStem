@@ -7,10 +7,12 @@ export const createVehicleType = async (req, res) => {
         // Check if a vehicle type with the same name already exists
         const existingVehicleType = await VehicleType.findOne({ vehicleName: req.body.vehicleName });
         if (existingVehicleType) {
+            console.log(existingVehicleType)
             return res.status(400).json({ message: 'A vehicle type with this name already exists' });
         }
 
         const vehicleType = new VehicleType({
+            vehicleId: uuidv4(),
             vehicleName: req.body.vehicleName,
             baseFare: req.body.baseFare,
             costPerMinute: req.body.costPerMinute,
@@ -23,6 +25,7 @@ export const createVehicleType = async (req, res) => {
         const newVehicleType = await vehicleType.save();
         res.status(201).json({ newVehicleType });
     } catch (err) {
+        console.log(err)
         res.status(500).json({
             message: 'Error creating vehicle type',
             error: err

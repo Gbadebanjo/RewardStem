@@ -1,15 +1,20 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import styled from "styled-components";
-import { MapContainer, TileLayer, Marker, Polygon } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Polygon,
+  Circle,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import { debounce } from "lodash";
-import process  from "process";
-import Map from "./Map";
 
 // Configure Leaflet's default icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -46,9 +51,9 @@ const Button = styled.button`
   cursor: pointer;
 `;
 
-const VehicleTypeForm = ({ vehicleTypeId, onSave }) => {
+const VehicleForm = ({ vehicleTypeId, onSave }) => {
   const [vehicleType, setVehicleType] = useState({
-    name: "",
+    vehicleName: "",
     location: {
       type: "Point",
       coordinates: [0, 0],
@@ -64,147 +69,69 @@ const VehicleTypeForm = ({ vehicleTypeId, onSave }) => {
   const [error, setError] = useState(null);
   const [locationName, setLocationName] = useState("");
   const [polygon, setPolygon] = useState(null);
-  const [polygons, setPolygons] = useState([]);
 
-  // useEffect(() => {
-  //   if (vehicleTypeId) {
-  //     const fetchVehicleType = async () => {
-  //       setIsLoading(true);
-  //       try {
-  //         const response = await axios.get(
-  //           `/api/vehicle-types/${vehicleTypeId}`
-  //         );
-  //         setVehicleType(response.data);
-  //         setLocationName(""); // You can update this to fetch the location name if available
-  //       } catch (err) {
-  //         setError(err.message);
-  //       }
-  //       setIsLoading(false);
-  //     };
-  //     fetchVehicleType();
-  //   }
-  // }, [vehicleTypeId]);
-  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setVehicleType({ ...vehicleType, [name]: value });
-    };
-    
-    const handleLocationNameChange = (e) => {
-      setLocationName(e.target.value);
-      };
-      
-  //   const geocodeLocation = async (location) => {
-  //   const apiKey = process.env.REACT_APP_GOOGLE_MAP_API_KEY;
-  //   const response = await axios.get(
-  //     `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-  //       location
-  //     )}&key=${apiKey}`
-  //   );
-  //   if (response.data.results.length > 0) {
-  //     const { lat, lng } = response.data.results[0].geometry.location;
-  //     return [lat, lng];
-  //   }
-  //   throw new Error("Location not found");
-  // };
+  };
 
-  // const getBoundingBox = async (location) => {
-  //   const apiKey = "AIzaSyBpv5y0SbiP8_8_yFLqbFygeotsg-kmfbI";
-  //   const response = await axios.get(
-  //     `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-  //       location
-  //     )}&key=${apiKey}`
-  //   );
-  //   if (response.data.results.length > 0) {
-  //     const bounds = response.data.results[0].geometry.bounds;
-  //     const northEast = [bounds.northeast.lat, bounds.northeast.lng];
-  //     const southWest = [bounds.southwest.lat, bounds.southwest.lng];
-  //     return [
-  //       [northEast[0], northEast[1]],
-  //       [southWest[0], northEast[1]],
-  //       [southWest[0], southWest[1]],
-  //       [northEast[0], southWest[1]],
-  //     ];
-  //   }
-  //   throw new Error("Bounding box not found");
-  // };
+  const handleLocationNameChange = async (e) => {
+    setLocationName(e.target.value);
 
+    try {
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${e.target.value}&key=AIzaSyBpv5y0SbiP8_8_yFLqbFygeotsg-kmfbI`
+      );
+      const { results } = response.data;
+      if (results.length > 0) {
+        const { location } = results[0].geometry;
 
-    const fetchCoordinates = async () => {
-      if (locationName) {
-        try {
-          const coordinates = await geocodeLocation(locationName);
-          const polygonCoords = await getBoundingBox(locationName);
-          setVehicleType((prev) => ({
-            ...prev,
-            location: {
-              type: "Point",
-              coordinates,
-            },
-          }));
-          setPolygon(polygonCoords);
-        } catch (err) {
-          setError(err.message);
-        }
+        setVehicleType({
+          ...vehicleType,
+          location: {
+            type: "Point",
+            coordinates: [location.lat, location.lng],
+          },
+        });
       }
-    };
-
-    const debouncedGeocodeLocation = useCallback(
-      debounce((location) => fetchCoordinates(location), 1500),
-      []
-    );
+    } catch (err) {
+      console.error("Error fetching location data:", err);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     try {
+      const formattedData = {
+        vehicleName: vehicleType.vehicleName,
+        baseFare: parseInt(vehicleType.baseFare),
+        costPerMinute: parseInt(vehicleType.costPerMinute),
+        costPerMile: parseInt(vehicleType.costPerMile),
+        hourlyRate: parseInt(vehicleType.hourlyRate),
+        surgeMultiplier: parseInt(vehicleType.surgeMultiplier),
+        additionalFees: parseInt(vehicleType.additionalFees),
+      };
+
       if (vehicleTypeId) {
-        await axios.put(`/api/vehicle-types/${vehicleTypeId}`, vehicleType);
+        await axios.put(`/api/vehicle-types/${vehicleTypeId}`, formattedData);
       } else {
-        console.log(vehicleType)
-        await axios.post(
-          "127.0.0.1:5000/api/admins/vehicleType/create",
-          vehicleType
-        );
+        await axios.post("/api/admins/vehicleType/create", formattedData);
       }
-      onSave();
+
+      toast.success("Vehicle Type Created Successfully");
     } catch (err) {
-      setError(err.message);
-    }
+        const errorMsg = err.response?.data?.message || err.message;
+        toast.error(errorMsg);
+        setError(errorMsg);
+      }
     setIsLoading(false);
   };
-
-
-  // useEffect(() => {
-  //   const fetchBoundaries = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         "https://api.boundaries-io.com/api/v1/public/boundary?zipcode=100001,112005"
-  //       );
-  //       if (response.status === 200) {
-  //         const boundaryData = response.data.map((boundary) =>
-  //           boundary.geojson.coordinates[0].map((coord) => ({
-  //             lat: coord[1],
-  //             lng: coord[0],
-  //           }))
-  //         );
-  //         console.log(boundaryData); // Debugging line
-  //         setPolygons(boundaryData);
-  //       } else {
-  //         console.error("Boundary data not found:", response);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching boundaries:", error);
-  //       setError(error.message);
-  //     }
-  //   };
-  //   fetchBoundaries();
-  // }, []);
-    
 
   return (
     <div style={{ color: "#008080", padding: "20px", height: "100vh" }}>
       <h2>{vehicleTypeId ? "Edit Vehicle Type" : "Create Vehicle Type"}</h2>
+      <ToastContainer />
       {isLoading ? (
         <div>Loading...</div>
       ) : error ? (
@@ -233,8 +160,8 @@ const VehicleTypeForm = ({ vehicleTypeId, onSave }) => {
               <Label>Vehicle Name:</Label>
               <Inputfield
                 type="text"
-                name="name"
-                value={vehicleType.name}
+                name="vehicleName"
+                value={vehicleType.vehicleName}
                 onChange={handleInputChange}
               />
             </LabelContainer>
@@ -301,7 +228,7 @@ const VehicleTypeForm = ({ vehicleTypeId, onSave }) => {
                 onChange={handleInputChange}
               />
             </LabelContainer>
-  
+
             <Button type="submit">{vehicleTypeId ? "Update" : "Create"}</Button>
           </form>
           <div style={{ flex: 1, padding: "10px" }}>
@@ -310,9 +237,9 @@ const VehicleTypeForm = ({ vehicleTypeId, onSave }) => {
               center={
                 vehicleType.location.coordinates[0] !== 0
                   ? vehicleType.location.coordinates
-                  : [9.020, 8.6753]
+                  : [9.02, 8.6753]
               }
-              zoom={7}
+              zoom={13}
               style={{ height: "100%", width: "100%" }}
             >
               <TileLayer
@@ -320,7 +247,16 @@ const VehicleTypeForm = ({ vehicleTypeId, onSave }) => {
                 attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
               />
               {vehicleType.location.coordinates[0] !== 0 && (
-                <Marker position={vehicleType.location.coordinates}></Marker>
+                <>
+                  <Marker position={vehicleType.location.coordinates}></Marker>
+                  <Circle
+                    center={vehicleType.location.coordinates}
+                    radius={4000} // Adjust radius as needed
+                    color="red"
+                    fillColor="red"
+                    fillOpacity={0.3}
+                  />
+                </>
               )}
               {polygon && <Polygon positions={polygon} color="red" />}
             </MapContainer>
@@ -328,19 +264,7 @@ const VehicleTypeForm = ({ vehicleTypeId, onSave }) => {
         </div>
       )}
     </div>
-
-    // <div>
-    // <h1>Southern California Limousine Booking</h1>
-    // {isLoading ? (
-    //   <div>Loading...</div>
-    // ) : error ? (
-    //   <div>Error: {error}</div>
-    // ) : (
-    //   <Map polygons={polygons} />
-    // )}
-    // </div>
   );
-  
 };
 
-export default VehicleTypeForm;
+export default VehicleForm;
