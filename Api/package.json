@@ -29,7 +29,8 @@
     "mongodb": "^6.6.1",
     "mongoose": "^8.3.5",
     "morgan": "^1.10.0",
-    "pg": "^8.11.5"
+    "pg": "^8.11.5",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "eslint-config-airbnb-base": "^15.0.0",
