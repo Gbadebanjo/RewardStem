@@ -9,6 +9,8 @@ import Transaction from "./pages/Transaction";
 import VehicleTypeForm from './pages/VehicleTypeForm';
 import VehicleTypeList from './pages/VehicleTypeList';
 import VehicleForm from './pages/VehicleForm';
+import Zone from './pages/Zone';
+import AdminDashboard from './pages/AdminDashboard';
 
 if (import.meta.env.VITE_ENV === "production") {
   axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
@@ -20,7 +22,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<VehicleTypeForm />} />
+        <Route path="/" element={<AdminDashboard />} />
+        <Route path="/zone" element={<Zone />} />
+        <Route path="/vehicleform" element={<VehicleTypeForm />} />
         <Route path="/form" element={<VehicleForm />} />
         <Route path="/list" element={<VehicleTypeList />} />
         <Route path="/home" element={<Home />} />
