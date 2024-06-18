@@ -7,7 +7,7 @@ const router = Router();
 router.post('/vehicleType/create', validateVehicleType, createVehicleType);
 router.get('/vehicleType/getAll', getAllvehicleTypes);
 router.get('/vehicleType/:id', getVehicleType);
-router.put('/vehicleType/:id', updateVehicleType);
+router.put('/vehicleType/:id', validateVehicleType, updateVehicleType);
 router.delete('/vehicleType/:id', deleteVehicleType);
 
 export default router;

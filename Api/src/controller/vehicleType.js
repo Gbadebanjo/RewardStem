@@ -166,15 +166,6 @@ export const updateVehicleType = async (req, res) => {
                 message: 'Vehicle type not found' 
             });
         }
-        // Check if a vehicle type with the same id or type already exists
-        const existingVehicleType = await VehicleType.findOne({ vehicleType: req.body.vehicleType  });
-
-        if (existingVehicleType ) {
-            return res.status(400).json({ 
-                status: 400,
-                message: 'A vehicle type with this ID or type already exists' 
-            });
-        }
 
         vehicleType.vehicleType = req.body.vehicleType;
         vehicleType.description = req.body.description;
