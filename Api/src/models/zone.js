@@ -17,6 +17,10 @@ const geoZoneSchema = new mongoose.Schema({
           required: true,
         },
     },
+    location: {
+        type: String,
+        required: true
+    },
     createdAt: {
         type: Date,
         default: Date.now

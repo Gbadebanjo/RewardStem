@@ -2,14 +2,13 @@ import Zone from '../models/zone.js';
 
 export const createZone = async (req, res) => {
   try {
-      const { name, geometry } = req.body;
-      console.log(req.body)
+      const { name, geometry, location } = req.body;
 
     // Check if the name or geometry is not provided
-      if (!name || !geometry) {
+      if (!name || !geometry || !location) {
         return res.status(400).json({
             status: 400,
-            message: 'Name and geometry are required'
+            message: 'Name, geometry and location are required'
         });
     }
 
@@ -26,6 +25,7 @@ export const createZone = async (req, res) => {
     const zone = new Zone({
       name,
       geometry,
+      location
     });
 
       const newZone = await zone.save();
@@ -64,7 +64,7 @@ export const getZones = async (req, res) => {
           data: zones
       });
   } catch (err) {
-    console.error(err); // Log the error for debugging purposes
+    console.error(err); 
       res.status(500).json({
           message: 'Server error'
       });
@@ -99,7 +99,7 @@ export const getZone = async (req, res) => {
 export const updateZone = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, geometry } = req.body;
+    const { name, geometry, location } = req.body;
 
     const zone = await Zone.findById(id);
     if (!zone) {
@@ -111,6 +111,7 @@ export const updateZone = async (req, res) => {
 
     zone.name = name;
     zone.geometry = geometry;
+    zone.location = location;
     await zone.save();
 
       res.status(200).json({
