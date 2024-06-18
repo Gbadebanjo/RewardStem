@@ -1,28 +1,9 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled from "styled-components";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Polygon,
-  Circle,
-} from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-
-// Configure Leaflet's default icon
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+import { useNavigate } from "react-router-dom";
 
 const LabelContainer = styled.div`
   display: flex;
@@ -49,15 +30,15 @@ const Button = styled.button`
   padding: 5px;
   margin-top: 10px;
   cursor: pointer;
+
+  &:hover {
+    background-color: #005050;
+  }
 `;
 
 const VehicleForm = ({ vehicleTypeId, onSave }) => {
   const [vehicleType, setVehicleType] = useState({
     vehicleName: "",
-    location: {
-      type: "Point",
-      coordinates: [0, 0],
-    },
     baseFare: 0,
     costPerMinute: 0,
     costPerMile: 0,
@@ -67,36 +48,27 @@ const VehicleForm = ({ vehicleTypeId, onSave }) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [locationName, setLocationName] = useState("");
-  const [polygon, setPolygon] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (vehicleTypeId) {
+      const fetchVehicleType = async () => {
+        try {
+          const response = await axios.get(`http://localhost:5000/api/vehicle-types/${vehicleTypeId}`);
+          setVehicleType(response.data);
+        } catch (err) {
+          const errorMsg = err.response?.data?.message || err.message;
+          toast.error(errorMsg);
+          setError(errorMsg);
+        }
+      };
+      fetchVehicleType();
+    }
+  }, [vehicleTypeId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setVehicleType({ ...vehicleType, [name]: value });
-  };
-
-  const handleLocationNameChange = async (e) => {
-    setLocationName(e.target.value);
-
-    try {
-      const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${e.target.value}&key=AIzaSyBpv5y0SbiP8_8_yFLqbFygeotsg-kmfbI`
-      );
-      const { results } = response.data;
-      if (results.length > 0) {
-        const { location } = results[0].geometry;
-
-        setVehicleType({
-          ...vehicleType,
-          location: {
-            type: "Point",
-            coordinates: [location.lat, location.lng],
-          },
-        });
-      }
-    } catch (err) {
-      console.error("Error fetching location data:", err);
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -114,17 +86,22 @@ const VehicleForm = ({ vehicleTypeId, onSave }) => {
       };
 
       if (vehicleTypeId) {
-        await axios.put(`/api/vehicle-types/${vehicleTypeId}`, formattedData);
+        await axios.put(`http://localhost:5000/api/vehicle-types/${vehicleTypeId}`, formattedData);
+        toast.success("Vehicle Type Updated Successfully");
       } else {
-        await axios.post("/api/admins/vehicleType/create", formattedData);
-      }
+        await axios.post("http://localhost:5000/api/admins/vehicleType/create", formattedData);
+        toast.success("Vehicle Type Created Successfully");
+        }
+      navigate("/");
 
-      toast.success("Vehicle Type Created Successfully");
-    } catch (err) {
-        const errorMsg = err.response?.data?.message || err.message;
-        toast.error(errorMsg);
-        setError(errorMsg);
+      if (onSave) {
+        onSave();
       }
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message;
+      toast.error(errorMsg);
+      setError(errorMsg);
+    }
     setIsLoading(false);
   };
 
@@ -163,15 +140,7 @@ const VehicleForm = ({ vehicleTypeId, onSave }) => {
                 name="vehicleName"
                 value={vehicleType.vehicleName}
                 onChange={handleInputChange}
-              />
-            </LabelContainer>
-            <LabelContainer>
-              <Label>Location Name:</Label>
-              <Inputfield
-                type="text"
-                name="locationName"
-                value={locationName}
-                onChange={handleLocationNameChange}
+                required
               />
             </LabelContainer>
             <LabelContainer>
@@ -181,6 +150,7 @@ const VehicleForm = ({ vehicleTypeId, onSave }) => {
                 name="baseFare"
                 value={vehicleType.baseFare}
                 onChange={handleInputChange}
+                required
               />
             </LabelContainer>
             <LabelContainer>
@@ -190,6 +160,7 @@ const VehicleForm = ({ vehicleTypeId, onSave }) => {
                 name="costPerMile"
                 value={vehicleType.costPerMile}
                 onChange={handleInputChange}
+                required
               />
             </LabelContainer>
             <LabelContainer>
@@ -199,6 +170,7 @@ const VehicleForm = ({ vehicleTypeId, onSave }) => {
                 name="costPerMinute"
                 value={vehicleType.costPerMinute}
                 onChange={handleInputChange}
+                required
               />
             </LabelContainer>
             <LabelContainer>
@@ -208,6 +180,7 @@ const VehicleForm = ({ vehicleTypeId, onSave }) => {
                 name="hourlyRate"
                 value={vehicleType.hourlyRate}
                 onChange={handleInputChange}
+                required
               />
             </LabelContainer>
             <LabelContainer>
@@ -217,6 +190,7 @@ const VehicleForm = ({ vehicleTypeId, onSave }) => {
                 name="surgeMultiplier"
                 value={vehicleType.surgeMultiplier}
                 onChange={handleInputChange}
+                required
               />
             </LabelContainer>
             <LabelContainer>
@@ -226,41 +200,12 @@ const VehicleForm = ({ vehicleTypeId, onSave }) => {
                 name="additionalFees"
                 value={vehicleType.additionalFees}
                 onChange={handleInputChange}
+                required
               />
             </LabelContainer>
 
             <Button type="submit">{vehicleTypeId ? "Update" : "Create"}</Button>
           </form>
-          <div style={{ flex: 1, padding: "10px" }}>
-            <h5>Map</h5>
-            <MapContainer
-              center={
-                vehicleType.location.coordinates[0] !== 0
-                  ? vehicleType.location.coordinates
-                  : [9.02, 8.6753]
-              }
-              zoom={13}
-              style={{ height: "100%", width: "100%" }}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
-              />
-              {vehicleType.location.coordinates[0] !== 0 && (
-                <>
-                  <Marker position={vehicleType.location.coordinates}></Marker>
-                  <Circle
-                    center={vehicleType.location.coordinates}
-                    radius={4000} // Adjust radius as needed
-                    color="red"
-                    fillColor="red"
-                    fillOpacity={0.3}
-                  />
-                </>
-              )}
-              {polygon && <Polygon positions={polygon} color="red" />}
-            </MapContainer>
-          </div>
         </div>
       )}
     </div>
