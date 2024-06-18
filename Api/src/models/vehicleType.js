@@ -6,34 +6,19 @@ const vehicleTypeSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    vehicleName: {
+    vehicleType: {
         type: String,
         required: true,
          unique: true
     },
-    baseFare: {
-        type: Number,
+    description: {
+        type: String,
         required: true
     },
-    costPerMinute: {
-        type: Number,
-        required: true
-    },
-    costPerMile: {
-        type: Number,
-        required: true
-    },
-    hourlyRate: {
-        type: Number,
-        required: true
-    },
-    surgeMultiplier: {
-        type: Number,
-        required: true, min: 1
-    },
-    additionalFees: {
-        type: Number,
-        required: true
+    status:{
+        type: String,
+        enum: ['active', 'inactive'],
+        default: 'active'
     },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
