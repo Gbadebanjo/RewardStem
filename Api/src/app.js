@@ -11,7 +11,8 @@ import "./models/transactions.js";
 import "./models/rewards.js";
 import userRouter from './routes/user.js';
 import transactionRouter from './routes/transaction.js';
-import vehicleTypeRouter from './routes/vehicleType.js';
+import vehicleClassRouter from './routes/vehicleClass.js';
+import serviceClassRouter from './routes/serviceClass.js';
 import zoneRouter from './routes/zone.js';
 import { errorHandler, notFound } from './utility/middlewares.js';
 
@@ -33,7 +34,8 @@ app.use(cookieParser());
 
 app.use('/api/users', userRouter);
 app.use('/api/transactions', transactionRouter);
-app.use('/api/admins', vehicleTypeRouter);
+app.use('/api/admins', vehicleClassRouter);
+app.use('/api/admins', serviceClassRouter);
 app.use('/api/admins', zoneRouter);
 
 app.get('/', (req, res) => {
