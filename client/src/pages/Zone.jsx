@@ -149,7 +149,7 @@ const Zone = () => {
   };
 
   const handleSuggestionClick = async (longitude, latitude) => {
-    setViewport({ ...viewport, latitude, longitude, zoom: 11 });
+    setViewport({ ...viewport, latitude, longitude, zoom: 12 });
     setSuggestions([]);
     const selected = suggestions.find(suggestion => suggestion.center[0] === longitude && suggestion.center[1] === latitude);
     setSelectedLocation(selected);
@@ -163,7 +163,8 @@ const Zone = () => {
       geometry: {
         type: "Point",
         coordinates: [selectedLocation.center[0], selectedLocation.center[1]]
-      }
+      },
+      location: selectedLocation.place_name
     };
     try {
       const response = await axios.post('http://127.0.0.1:5000/api/admins/zones', data, {
@@ -250,10 +251,11 @@ const Zone = () => {
             <Source id="address-shape" type="geojson" data={geojsonData}>
               <Layer
                 id="address-shape-layer"
-                type="line"
+                type="fill"
                 paint={{
-                  'line-color': 'red',
-                  'line-width': 1,
+                  'fill-color': '#D52323',
+                  'fill-opacity': 0.6,
+                  'fill-outline-color': '#008',
                 }}
               />
             </Source>

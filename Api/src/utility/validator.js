@@ -7,7 +7,7 @@ export const signUp = Joi.object().keys({
     .regex(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{6,30}$/)
     .message('Password must contain at least one uppercase letter, one lowercase letter, one of these symbols (@$!%*?&#) , one digit, and be between 6 and 30 characters in length.')
     .required(),
-    confirmPassword: Joi.string().required(),
+  confirmPassword: Joi.string().required(),
 });
 
 export const Login = Joi.object().keys({
@@ -29,11 +29,11 @@ export const vehicleType = Joi.object({
   status: Joi.string().valid('active', 'inactive').default('active'),
 });
 export const options = {
-    abortEarly: false,
-    errors: {
-        wrap: {
-            label: "",
-        }
+  abortEarly: false,
+  errors: {
+    wrap: {
+      label: "",
     }
+  }
 }
 

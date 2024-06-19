@@ -1,4 +1,4 @@
-import  VehicleType  from './../models/vehicleType.js'
+import VehicleType from './../models/vehicleType.js'
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -39,13 +39,13 @@ export const createVehicleType = async (req, res) => {
         const { vehicleType, description } = req.body;
 
         // Check if a vehicle type with the same id or type already exists
-        const existingVehicleType = await VehicleType.findOne({ vehicleType});
+        const existingVehicleType = await VehicleType.findOne({ vehicleType });
 
         if (existingVehicleType) {
             console.log(existingVehicleType)
-            return res.status(400).json({ 
+            return res.status(400).json({
                 status: 400,
-                message: 'A vehicle of this type already exists' 
+                message: 'A vehicle of this type already exists'
             });
         }
 
@@ -56,10 +56,10 @@ export const createVehicleType = async (req, res) => {
         });
 
         // const newVehicleType = await vehicleType.save();
-        res.status(201).json({ 
+        res.status(201).json({
             status: 200,
             message: 'Vehicle type created successfully',
-            newVehicleType, 
+            newVehicleType,
         });
     } catch (err) {
         console.log(err)
@@ -71,36 +71,36 @@ export const createVehicleType = async (req, res) => {
 };
 
 export const getAllvehicleTypes = async (req, res) => {
-  try {
-    const vehicleTypes = await VehicleType.find();
+    try {
+        const vehicleTypes = await VehicleType.find();
 
-    if (!vehicleTypes || vehicleTypes.length === 0) {
-        return res.status(404).json({ 
-          status: 404, 
-          message: 'No vehicle types found' 
+        if (!vehicleTypes || vehicleTypes.length === 0) {
+            return res.status(404).json({
+                status: 404,
+                message: 'No vehicle types found'
+            });
+        }
+
+        res.status(200).json({
+            status: 200,
+            vehicleTypes
         });
-      }
-
-      res.status(200).json({
-          status: 200,
-          vehicleTypes
-      });
-  } catch (err) {
-    res.status(500).json({ 
-        status: 500,
-        message: err.message 
-    });
-  }
+    } catch (err) {
+        res.status(500).json({
+            status: 500,
+            message: err.message
+        });
+    }
 };
 
 // Get a single vehicle type
-export const getVehicleType = async (req, res) => {  
+export const getVehicleType = async (req, res) => {
     try {
         const vehicleType = await VehicleType.findById(req.params.id);
         if (!vehicleType) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 status: 404,
-                message: 'Vehicle type not found' 
+                message: 'Vehicle type not found'
             });
         }
         res.status(200).json({
@@ -111,13 +111,13 @@ export const getVehicleType = async (req, res) => {
         console.error(err);
         if (err.name === 'CastError') {
             res.status(400).json({
-                status: 400, 
-                message: 'Invalid ID format' 
+                status: 400,
+                message: 'Invalid ID format'
             });
         } else {
-            res.status(500).json({ 
+            res.status(500).json({
                 status: 500,
-                message: 'Server error' 
+                message: 'Server error'
             });
         }
     }
@@ -157,13 +157,13 @@ export const getVehicleType = async (req, res) => {
 //     }
 // };
 
-export const updateVehicleType = async (req, res) => { 
+export const updateVehicleType = async (req, res) => {
     try {
         const vehicleType = await VehicleType.findById(req.params.id);
         if (!vehicleType) {
             return res.status(404).json({
                 status: 404,
-                message: 'Vehicle type not found' 
+                message: 'Vehicle type not found'
             });
         }
 
@@ -172,12 +172,12 @@ export const updateVehicleType = async (req, res) => {
         vehicleType.status = req.body.status || 'active'; // default to 'active' if not provided
 
         const updatedVehicleType = await vehicleType.save();
-        res.status(200).json({ 
+        res.status(200).json({
             status: 200,
-            updatedVehicleType 
+            updatedVehicleType
         });
     } catch (err) {
-        console.error(err); 
+        console.error(err);
         if (err.name === 'CastError') {
             res.status(400).json({ message: 'Invalid ID format' });
         } else {
@@ -187,7 +187,7 @@ export const updateVehicleType = async (req, res) => {
 };
 
 // delete  a vehicle
-export const deleteVehicleType = async (req, res) => { 
+export const deleteVehicleType = async (req, res) => {
     try {
         const vehicleType = await VehicleType.findById(req.params.id);
         if (!vehicleType) {

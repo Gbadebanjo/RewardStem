@@ -3,7 +3,7 @@ import axios from "axios";
 import styled from "styled-components";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const LabelContainer = styled.div`
   display: flex;
@@ -36,25 +36,27 @@ const Button = styled.button`
   }
 `;
 
-const VehicleForm = ({ vehicleTypeId, onSave }) => {
+const VehicleForm = () => {
   const [vehicleType, setVehicleType] = useState({
-    vehicleName: "",
-    baseFare: 0,
-    costPerMinute: 0,
-    costPerMile: 0,
-    hourlyRate: 0,
-    surgeMultiplier: 1,
-    additionalFees: 0,
+    className: "",
+    requirements: ""
   });
+
+  const [serviceClass, setServiceClass] = useState({
+    className: "",
+    requirements: ""
+  });
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { vehicleId } = useParams(); // Fetching vehicleId from URL params
 
   useEffect(() => {
-    if (vehicleTypeId) {
+    if (vehicleId) {
       const fetchVehicleType = async () => {
         try {
-          const response = await axios.get(`http://localhost:5000/api/vehicle-types/${vehicleTypeId}`);
+          const response = await axios.get(`http://localhost:5000/api/admins/vehicleClass/${vehicleId}`);
           setVehicleType(response.data);
         } catch (err) {
           const errorMsg = err.response?.data?.message || err.message;
@@ -64,39 +66,55 @@ const VehicleForm = ({ vehicleTypeId, onSave }) => {
       };
       fetchVehicleType();
     }
-  }, [vehicleTypeId]);
+  }, [vehicleId]);
 
-  const handleInputChange = (e) => {
+  const handleVehicleInputChange = (e) => {
     const { name, value } = e.target;
     setVehicleType({ ...vehicleType, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleServiceInputChange = (e) => {
+    const { name, value } = e.target;
+    setServiceClass({ ...serviceClass, [name]: value });
+  };
+
+  const handleVehicleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     try {
       const formattedData = {
-        vehicleName: vehicleType.vehicleName,
-        baseFare: parseInt(vehicleType.baseFare),
-        costPerMinute: parseInt(vehicleType.costPerMinute),
-        costPerMile: parseInt(vehicleType.costPerMile),
-        hourlyRate: parseInt(vehicleType.hourlyRate),
-        surgeMultiplier: parseInt(vehicleType.surgeMultiplier),
-        additionalFees: parseInt(vehicleType.additionalFees),
+        className: vehicleType.className,
+        requirements: vehicleType.requirements
       };
 
-      if (vehicleTypeId) {
-        await axios.put(`http://localhost:5000/api/vehicle-types/${vehicleTypeId}`, formattedData);
-        toast.success("Vehicle Type Updated Successfully");
+      if (vehicleId) {
+        await axios.put(`http://localhost:5000/api/admins/vehicleClass/${vehicleId}`, formattedData);
+        toast.success("Vehicle Class Updated Successfully");
       } else {
-        await axios.post("http://localhost:5000/api/admins/vehicleType/create", formattedData);
-        toast.success("Vehicle Type Created Successfully");
-        }
-      navigate("/");
-
-      if (onSave) {
-        onSave();
+        await axios.post("http://localhost:5000/api/admins/vehicleClass/create", formattedData);
+        toast.success("Vehicle Class Created Successfully");
       }
+      navigate("/"); // Navigate back to AdminDashboard after form submission
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message;
+      toast.error(errorMsg);
+      setError(errorMsg);
+    }
+    setIsLoading(false);
+  };
+
+  const handleServiceSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const formattedData = {
+        className: serviceClass.className,
+        requirements: serviceClass.requirements
+      };
+
+      await axios.post("http://localhost:5000/api/admins/serviceClass/create", formattedData);
+      toast.success("Service Class Created Successfully");
+      navigate("/"); // Navigate back to AdminDashboard after form submission
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message;
       toast.error(errorMsg);
@@ -107,104 +125,68 @@ const VehicleForm = ({ vehicleTypeId, onSave }) => {
 
   return (
     <div style={{ color: "#008080", padding: "20px", height: "100vh" }}>
-      <h2>{vehicleTypeId ? "Edit Vehicle Type" : "Create Vehicle Type"}</h2>
+      <h2>{vehicleId ? "Edit Vehicle Class" : "Create Vehicle Class"}</h2>
       <ToastContainer />
       {isLoading ? (
         <div>Loading...</div>
       ) : error ? (
         <div>Error: {error}</div>
       ) : (
-        <div
-          style={{
-            backgroundColor: "#f7f7f7",
-            height: "80vh",
-            display: "flex",
-            flexDirection: "row",
-          }}
-        >
+        <div style={{ backgroundColor: "#f7f7f7", height: "80vh", display: "flex", flexDirection: "row" }}>
           <form
-            onSubmit={handleSubmit}
-            style={{
-              color: "#008080",
-              display: "flex",
-              flexDirection: "column",
-              padding: "10px",
-              width: "25%",
-            }}
+            onSubmit={handleVehicleSubmit}
+            style={{ color: "#008080", display: "flex", flexDirection: "column", padding: "10px", width: "25%" }}
           >
-            <h5>Vehicle Instructions</h5>
+            <h5>Vehicle Class</h5>
             <LabelContainer>
-              <Label>Vehicle Name:</Label>
+              <Label>Class Name:</Label>
               <Inputfield
                 type="text"
-                name="vehicleName"
-                value={vehicleType.vehicleName}
-                onChange={handleInputChange}
+                name="className"
+                value={vehicleType.className}
+                onChange={handleVehicleInputChange}
                 required
               />
             </LabelContainer>
             <LabelContainer>
-              <Label>Base Fare:</Label>
+              <Label>Requirements:</Label>
               <Inputfield
-                type="number"
-                name="baseFare"
-                value={vehicleType.baseFare}
-                onChange={handleInputChange}
+                type="text"
+                name="requirements"
+                value={vehicleType.requirements}
+                onChange={handleVehicleInputChange}
                 required
               />
             </LabelContainer>
-            <LabelContainer>
-              <Label>Cost Per Mile:</Label>
-              <Inputfield
-                type="number"
-                name="costPerMile"
-                value={vehicleType.costPerMile}
-                onChange={handleInputChange}
-                required
-              />
-            </LabelContainer>
-            <LabelContainer>
-              <Label>Cost Per Minute:</Label>
-              <Inputfield
-                type="number"
-                name="costPerMinute"
-                value={vehicleType.costPerMinute}
-                onChange={handleInputChange}
-                required
-              />
-            </LabelContainer>
-            <LabelContainer>
-              <Label>Hourly Rate:</Label>
-              <Inputfield
-                type="number"
-                name="hourlyRate"
-                value={vehicleType.hourlyRate}
-                onChange={handleInputChange}
-                required
-              />
-            </LabelContainer>
-            <LabelContainer>
-              <Label>Surge Multiplier:</Label>
-              <Inputfield
-                type="number"
-                name="surgeMultiplier"
-                value={vehicleType.surgeMultiplier}
-                onChange={handleInputChange}
-                required
-              />
-            </LabelContainer>
-            <LabelContainer>
-              <Label>Additional Fees:</Label>
-              <Inputfield
-                type="number"
-                name="additionalFees"
-                value={vehicleType.additionalFees}
-                onChange={handleInputChange}
-                required
-              />
-            </LabelContainer>
+            <Button type="submit">{vehicleId ? "Update" : "Create"}</Button>
+          </form>
 
-            <Button type="submit">{vehicleTypeId ? "Update" : "Create"}</Button>
+          <form
+            onSubmit={handleServiceSubmit}
+            style={{ color: "#008080", display: "flex", flexDirection: "column", padding: "10px", width: "25%" }}
+          >
+            <h5>Service Class</h5>
+            <LabelContainer>
+              <Label>Class Name:</Label>
+              <Inputfield
+                type="text"
+                name="className"
+                value={serviceClass.className}
+                onChange={handleServiceInputChange}
+                required
+              />
+            </LabelContainer>
+            <LabelContainer>
+              <Label>Requirements:</Label>
+              <Inputfield
+                type="text"
+                name="requirements"
+                value={serviceClass.requirements}
+                onChange={handleServiceInputChange}
+                required
+              />
+            </LabelContainer>
+            <Button type="submit">Create Service Class</Button>
           </form>
         </div>
       )}

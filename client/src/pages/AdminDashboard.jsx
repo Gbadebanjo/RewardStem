@@ -3,9 +3,9 @@ import axios from 'axios';
 import styled from 'styled-components';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 
 // Styled Components
 const Container = styled.div`
@@ -66,9 +66,9 @@ const CreateButton = styled.button`
   }
 `;
 
-const DeleteIcon = styled.span`
-  color: #FF6347;
+const ActionIcon = styled.span`
   cursor: pointer;
+  margin-left: 10px;
   &:hover {
     color: #FF3E20;
   }
@@ -80,6 +80,7 @@ const AdminDashboard = () => {
   const [zones, setZones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -100,15 +101,27 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
-  const handleDelete = async (vehicleTypeId) => {
+  const handleDeleteVehicle = async (vehicleTypeId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/admins/vehicleType/${vehicleTypeId}`);
+      await axios.delete(`http://127.0.0.1:5000/api/admins/vehicleType/${vehicleTypeId}`);
       toast.success("Vehicle Type Deleted Successfully");
       // After successful deletion, update the vehicle types list
       fetchVehicleTypes();
     } catch (error) {
       console.error(`Error deleting vehicle type ${vehicleTypeId}:`, error);
       toast.error("Failed to delete vehicle type");
+    }
+  };
+
+  const handleDeleteZone = async (zoneId) => {
+    try {
+      await axios.delete(`http://127.0.0.1:5000/api/admins/zones/${zoneId}`);
+      toast.success("Zone Deleted Successfully");
+      // After successful deletion, update the zones list
+      fetchZones();
+    } catch (error) {
+      console.error(`Error deleting zone ${zoneId}:`, error);
+      toast.error("Failed to delete zone");
     }
   };
 
@@ -119,6 +132,16 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error fetching vehicle types:', error);
       toast.error('Failed to fetch vehicle types');
+    }
+  };
+
+  const fetchZones = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:5000/api/admins/zones');
+      setZones(response.data.data);
+    } catch (error) {
+      console.error('Error fetching zones:', error);
+      toast.error('Failed to fetch zones');
     }
   };
 
@@ -137,19 +160,71 @@ const AdminDashboard = () => {
         <Table>
           <thead>
             <tr>
-              <Th>ID</Th>
               <Th>Name</Th>
+              <Th>Location</Th>
               <Th>Latitude</Th>
               <Th>Longitude</Th>
+              <Th>Actions</Th>
             </tr>
           </thead>
           <tbody>
             {zones.map(zone => (
               <tr key={zone._id}>
-                <Td>{zone._id}</Td>
                 <Td>{zone.name}</Td>
+                <Td>{zone.location}</Td>
                 <Td>{zone.geometry.coordinates[1]}</Td>
                 <Td>{zone.geometry.coordinates[0]}</Td>
+                <Td>
+                  <ActionIcon onClick={() => handleDeleteZone(zone._id)}>
+                    <FontAwesomeIcon icon={faTrash} />
+                  </ActionIcon>
+                </Td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </Section>
+    );
+  };
+
+  // Ensure vehicles is initialized as an array before mapping
+  const renderVehicles = () => {
+    if (!Array.isArray(vehicles)) {
+      return (
+        <Error>
+          Error fetching vehicles data.
+        </Error>
+      );
+    }
+    return (
+      <Section>
+        <h3>All Vehicles</h3>
+        <Table>
+          <thead>
+            <tr>
+              <Th>Vehicle ID</Th>
+              <Th>Vehicle Name</Th>
+              <Th>Description</Th>
+              
+              <Th>Actions</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {vehicles.map(vehicle => (
+              <tr key={vehicle._id}>
+                <Td>{vehicle._id}</Td>
+                <Td>{vehicle.vehicleType}</Td>
+                <Td>{vehicle.description}</Td>       
+                <Td>
+                  {/* <Link to={`/form/${vehicle._id}`}>
+                    <ActionIcon>
+                      <FontAwesomeIcon icon={faEdit} />
+                    </ActionIcon>
+                  </Link> */}
+                  <ActionIcon onClick={() => handleDeleteVehicle(vehicle._id)}>
+                    <FontAwesomeIcon icon={faTrash} />
+                  </ActionIcon>
+                </Td>
               </tr>
             ))}
           </tbody>
@@ -168,51 +243,15 @@ const AdminDashboard = () => {
         <Error>{error}</Error>
       ) : (
         <>
-          <Section>
-            <ButtonContainer>
-              <Link to="/zone">
-                <CreateButton>Create New Zone</CreateButton>
-              </Link>
-              <Link to="/form">
-                <CreateButton>Create New Vehicle</CreateButton>
-              </Link>
-            </ButtonContainer>
-            <h3>All Vehicles</h3>
-            <Table>
-              <thead>
-                <tr>
-                  <Th>ID</Th>
-                  <Th>Name</Th>
-                  <Th>Base Fare</Th>
-                  <Th>Cost Per Minute</Th>
-                  <Th>Cost Per Mile</Th>
-                  <Th>Hourly Rate</Th>
-                  <Th>Surge Multiplier</Th>
-                  <Th>Additional Fees</Th>
-                  <Th>Actions</Th> {/* Added Actions column */}
-                </tr>
-              </thead>
-              <tbody>
-                {vehicles.map(vehicle => (
-                  <tr key={vehicle._id}>
-                    <Td>{vehicle._id}</Td>
-                    <Td>{vehicle.vehicleName}</Td>
-                    <Td>{vehicle.baseFare}</Td>
-                    <Td>{vehicle.costPerMinute}</Td>
-                    <Td>{vehicle.costPerMile}</Td>
-                    <Td>{vehicle.hourlyRate}</Td>
-                    <Td>{vehicle.surgeMultiplier}</Td>
-                    <Td>{vehicle.additionalFees}</Td>
-                    <Td>
-                      <DeleteIcon onClick={() => handleDelete(vehicle._id)}>
-                        <FontAwesomeIcon icon={faTrash} />
-                      </DeleteIcon>
-                    </Td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </Section>
+          <ButtonContainer>
+            <Link to="/zone">
+              <CreateButton>Create New Zone</CreateButton>
+            </Link>
+            <Link to="/form">
+              <CreateButton>Create New Vehicle</CreateButton>
+            </Link>
+          </ButtonContainer>
+          {renderVehicles()}
           {renderZones()}
         </>
       )}

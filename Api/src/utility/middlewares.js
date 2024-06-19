@@ -24,15 +24,15 @@ export const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
-    console.log(`token: `,token)
+    console.log(`token: `, token)
 
-  if (!token) {
-    return res.status(403).json({
-      status: 403,
-      message: 'Authentication failed'
-    });
-  }
-  
+    if (!token) {
+      return res.status(403).json({
+        status: 403,
+        message: 'Authentication failed'
+      });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.id;
     console.log(decoded)

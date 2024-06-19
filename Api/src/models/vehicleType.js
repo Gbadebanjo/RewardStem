@@ -9,19 +9,19 @@ const vehicleTypeSchema = new mongoose.Schema({
     vehicleType: {
         type: String,
         required: true,
-         unique: true
+        unique: true
     },
     description: {
         type: String,
         required: true
     },
-    status:{
+    status: {
         type: String,
         enum: ['active', 'inactive'],
         default: 'active'
     },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
 });
 
 const VehicleType = mongoose.model('VehicleType', vehicleTypeSchema);

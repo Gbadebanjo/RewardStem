@@ -4,7 +4,7 @@ import { createVehicleType, getAllvehicleTypes, getVehicleType, updateVehicleTyp
 
 const router = Router();
 
-router.post('/vehicleType/create', validateVehicleType, createVehicleType);
+router.post('/vehicleType/create', createVehicleType);
 router.get('/vehicleType/getAll', getAllvehicleTypes);
 router.get('/vehicleType/:id', getVehicleType);
 router.put('/vehicleType/:id', validateVehicleType, updateVehicleType);
