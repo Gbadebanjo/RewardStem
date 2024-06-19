@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { config } from "dotenv";
-import { signUp, transaction, Login, vehicleType } from './validator.js';
+import { signUp, transaction, Login, vehicleClass, serviceClass } from './validator.js';
 
 export function notFound(req, res, next) {
   res.status(404);
@@ -73,8 +73,17 @@ export function validateTransaction(req, res, next) {
   }
   next();
 }
-export function validateVehicleType(req, res, next) {
-  const { error } = vehicleType.validate(req.body);
+export function validateVehicleClass(req, res, next) {
+  const { error } = vehicleClass.validate(req.body);
+  if (error) {
+    return res.status(400).json({
+      error: error.details[0].message
+    });
+  }
+  next();
+}
+export function validateServiceClass(req, res, next) {
+  const { error } = serviceClass.validate(req.body);
   if (error) {
     return res.status(400).json({
       error: error.details[0].message

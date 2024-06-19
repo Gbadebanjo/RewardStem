@@ -1,29 +1,24 @@
 import mongoose from 'mongoose';
 
-const vehicleTypeSchema = new mongoose.Schema({
-    vehicleId: {
+const serviceClassSchema = new mongoose.Schema({
+    classId: {
         type: String,
         required: true,
         unique: true
     },
-    vehicleType: {
+    className: {
         type: String,
         required: true,
          unique: true
     },
-    description: {
+    requirements: {
         type: String,
         required: true
-    },
-    status:{
-        type: String,
-        enum: ['active', 'inactive'],
-        default: 'active'
     },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 
-const VehicleType = mongoose.model('VehicleType', vehicleTypeSchema);
+const ServiceClass = mongoose.model('ServiceClass', serviceClassSchema);
 
-export default VehicleType;
+export default ServiceClass;
