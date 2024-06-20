@@ -78,37 +78,41 @@ const ActionIcon = styled.span`
 const AdminDashboard = () => {
   const [vehicles, setVehicles] = useState([]);
   const [zones, setZones] = useState([]);
+  const [serviceClasses, setServiceClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [vehicleResponse, zoneResponse] = await Promise.all([
-          axios.get('http://127.0.0.1:5000/api/admins/vehicleType/getAll'),
-          axios.get('http://127.0.0.1:5000/api/admins/zones')
-        ]);
-        setVehicles(vehicleResponse.data.vehicleTypes); // Assuming vehicleTypes array from vehicleResponse
-        setZones(zoneResponse.data.data); // Set zones array from zoneResponse data
-      } catch (err) {
-        setError(err.message);
-        toast.error('Error fetching data');
-      }
-      setLoading(false);
-    };
     fetchData();
   }, []);
 
-  const handleDeleteVehicle = async (vehicleTypeId) => {
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      await axios.delete(`http://127.0.0.1:5000/api/admins/vehicleType/${vehicleTypeId}`);
+      const [vehicleResponse, zoneResponse, serviceClassResponse] = await Promise.all([
+        axios.get('http://127.0.0.1:5000/api/admins/vehicleClass/getAll'),
+        axios.get('http://127.0.0.1:5000/api/admins/zones'),
+        axios.get('http://127.0.0.1:5000/api/admins/serviceClass/getAll'),
+      ]);
+      setVehicles(vehicleResponse.data.vehicleClasses); // Assuming vehicleClasses array from vehicleResponse
+      setZones(zoneResponse.data.data); // Set zones array from zoneResponse data
+      setServiceClasses(serviceClassResponse.data.serviceClasses); // Set serviceClasses array from serviceClassResponse data
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+      toast.error('Error fetching data');
+    }
+    setLoading(false);
+  };
+
+  const handleDeleteVehicle = async (classId) => {
+    try {
+      await axios.delete(`http://127.0.0.1:5000/api/admins/vehicleClass/${classId}`);
       toast.success("Vehicle Type Deleted Successfully");
-      // After successful deletion, update the vehicle types list
-      fetchVehicleTypes();
+      // Refresh vehicle types after deletion
+      fetchData();
     } catch (error) {
-      console.error(`Error deleting vehicle type ${vehicleTypeId}:`, error);
+      console.error(`Error deleting vehicle type ${classId}:`, error);
       toast.error("Failed to delete vehicle type");
     }
   };
@@ -117,118 +121,132 @@ const AdminDashboard = () => {
     try {
       await axios.delete(`http://127.0.0.1:5000/api/admins/zones/${zoneId}`);
       toast.success("Zone Deleted Successfully");
-      // After successful deletion, update the zones list
-      fetchZones();
+      // Refresh zones after deletion
+      fetchData();
     } catch (error) {
       console.error(`Error deleting zone ${zoneId}:`, error);
       toast.error("Failed to delete zone");
     }
   };
 
-  const fetchVehicleTypes = async () => {
+  const handleDeleteServiceClass = async (classId) => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/admins/vehicleType/getAll');
-      setVehicles(response.data.vehicleTypes);
+      await axios.delete(`http://127.0.0.1:5000/api/admins/serviceClass/${classId}`);
+      toast.success("Service Class Deleted Successfully");
+      // Refresh service classes after deletion
+      fetchData();
     } catch (error) {
-      console.error('Error fetching vehicle types:', error);
-      toast.error('Failed to fetch vehicle types');
+      console.error(`Error deleting service class ${classId}:`, error);
+      toast.error("Failed to delete service class");
     }
   };
 
-  const fetchZones = async () => {
-    try {
-      const response = await axios.get('http://127.0.0.1:5000/api/admins/zones');
-      setZones(response.data.data);
-    } catch (error) {
-      console.error('Error fetching zones:', error);
-      toast.error('Failed to fetch zones');
-    }
-  };
-
-  // Ensure zones is initialized as an array before mapping
   const renderZones = () => {
-    if (!Array.isArray(zones)) {
-      return (
-        <Error>
-          Error fetching zones data.
-        </Error>
-      );
-    }
     return (
       <Section>
         <h3>All Zones</h3>
-        <Table>
-          <thead>
-            <tr>
-              <Th>Name</Th>
-              <Th>Location</Th>
-              <Th>Latitude</Th>
-              <Th>Longitude</Th>
-              <Th>Actions</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {zones.map(zone => (
-              <tr key={zone._id}>
-                <Td>{zone.name}</Td>
-                <Td>{zone.location}</Td>
-                <Td>{zone.geometry.coordinates[1]}</Td>
-                <Td>{zone.geometry.coordinates[0]}</Td>
-                <Td>
-                  <ActionIcon onClick={() => handleDeleteZone(zone._id)}>
-                    <FontAwesomeIcon icon={faTrash} />
-                  </ActionIcon>
-                </Td>
+        {zones.length > 0 ? (
+          <Table>
+            <thead>
+              <tr>
+                <Th>Name</Th>
+                <Th>Location</Th>
+                <Th>Latitude</Th>
+                <Th>Longitude</Th>
+                <Th>Actions</Th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {zones.map(zone => (
+                <tr key={zone._id}>
+                  <Td>{zone.name}</Td>
+                  <Td>{zone.location}</Td>
+                  <Td>{zone.geometry.coordinates[1]}</Td>
+                  <Td>{zone.geometry.coordinates[0]}</Td>
+                  <Td>
+                    <ActionIcon onClick={() => handleDeleteZone(zone._id)}>
+                      <FontAwesomeIcon icon={faTrash} />
+                    </ActionIcon>
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        ) : (
+          <Error>No zones available.</Error>
+        )}
       </Section>
     );
   };
 
-  // Ensure vehicles is initialized as an array before mapping
   const renderVehicles = () => {
-    if (!Array.isArray(vehicles)) {
-      return (
-        <Error>
-          Error fetching vehicles data.
-        </Error>
-      );
-    }
     return (
       <Section>
         <h3>All Vehicles</h3>
-        <Table>
-          <thead>
-            <tr>
-              <Th>Vehicle ID</Th>
-              <Th>Vehicle Name</Th>
-              <Th>Description</Th>
-              
-              <Th>Actions</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {vehicles.map(vehicle => (
-              <tr key={vehicle._id}>
-                <Td>{vehicle._id}</Td>
-                <Td>{vehicle.vehicleType}</Td>
-                <Td>{vehicle.description}</Td>       
-                <Td>
-                  {/* <Link to={`/form/${vehicle._id}`}>
-                    <ActionIcon>
-                      <FontAwesomeIcon icon={faEdit} />
-                    </ActionIcon>
-                  </Link> */}
-                  <ActionIcon onClick={() => handleDeleteVehicle(vehicle._id)}>
-                    <FontAwesomeIcon icon={faTrash} />
-                  </ActionIcon>
-                </Td>
+        {vehicles.length > 0 ? (
+          <Table>
+            <thead>
+              <tr>
+                <Th>S/N</Th>
+                <Th>Vehicle Class Name</Th>
+                <Th>Requirements</Th>
+                <Th>Actions</Th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {vehicles.map(vehicle => (
+                <tr key={vehicle._id}>
+                  <Td>{vehicle.description}</Td>
+                  <Td>{vehicle.className}</Td>
+                  <Td>{vehicle.requirements}</Td>
+                  <Td>
+                    <ActionIcon onClick={() => handleDeleteVehicle(vehicle._id)}>
+                      <FontAwesomeIcon icon={faTrash} />
+                    </ActionIcon>
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        ) : (
+          <Error>No vehicles available.</Error>
+        )}
+      </Section>
+    );
+  };
+
+  const renderServiceClasses = () => {
+    return (
+      <Section>
+        <h3>All Service Classes</h3>
+        {serviceClasses.length > 0 ? (
+          <Table>
+            <thead>
+              <tr>
+                <Th>S/N</Th>
+                <Th>Service Class Name</Th>
+                <Th>Requirements</Th>
+                <Th>Actions</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {serviceClasses.map(serviceClass => (
+                <tr key={serviceClass._id}>
+                  <Td>{serviceClass.description}</Td>
+                  <Td>{serviceClass.className}</Td>
+                  <Td>{serviceClass.requirements}</Td>
+                  <Td>
+                    <ActionIcon onClick={() => handleDeleteServiceClass(serviceClass._id)}>
+                      <FontAwesomeIcon icon={faTrash} />
+                    </ActionIcon>
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        ) : (
+          <Error>No service classes available.</Error>
+        )}
       </Section>
     );
   };
@@ -248,10 +266,11 @@ const AdminDashboard = () => {
               <CreateButton>Create New Zone</CreateButton>
             </Link>
             <Link to="/form">
-              <CreateButton>Create New Vehicle</CreateButton>
+              <CreateButton>Create New Class</CreateButton>
             </Link>
           </ButtonContainer>
           {renderVehicles()}
+          {renderServiceClasses()}
           {renderZones()}
         </>
       )}

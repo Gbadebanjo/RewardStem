@@ -36,6 +36,14 @@ const Button = styled.button`
   }
 `;
 
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  width: 25%;
+  margin-right: 5%;
+`;
+
 const VehicleForm = () => {
   const [vehicleType, setVehicleType] = useState({
     className: "",
@@ -96,7 +104,7 @@ const VehicleForm = () => {
       }
       navigate("/"); // Navigate back to AdminDashboard after form submission
     } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message;
+      const errorMsg = err.response?.data?.message || err.message || err.response.message;
       toast.error(errorMsg);
       setError(errorMsg);
     }
@@ -133,7 +141,7 @@ const VehicleForm = () => {
         <div>Error: {error}</div>
       ) : (
         <div style={{ backgroundColor: "#f7f7f7", height: "80vh", display: "flex", flexDirection: "row" }}>
-          <form
+          <Form
             onSubmit={handleVehicleSubmit}
             style={{ color: "#008080", display: "flex", flexDirection: "column", padding: "10px", width: "25%" }}
           >
@@ -159,9 +167,9 @@ const VehicleForm = () => {
               />
             </LabelContainer>
             <Button type="submit">{vehicleId ? "Update" : "Create"}</Button>
-          </form>
+          </Form>
 
-          <form
+          <Form
             onSubmit={handleServiceSubmit}
             style={{ color: "#008080", display: "flex", flexDirection: "column", padding: "10px", width: "25%" }}
           >
@@ -187,7 +195,7 @@ const VehicleForm = () => {
               />
             </LabelContainer>
             <Button type="submit">Create Service Class</Button>
-          </form>
+          </Form>
         </div>
       )}
     </div>
